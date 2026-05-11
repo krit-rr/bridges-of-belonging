@@ -66,7 +66,7 @@ export default function Submit() {
   if (submitted) {
     return (
       <div style={styles.container}>
-        <h1 style={styles.heading}>You're on the map 🌉</h1>
+        <h1 style={styles.heading}>You're on the map</h1>
         <p style={styles.sub}>Thanks {name} — look up at the screen to find yourself in the network.</p>
       </div>
     );
