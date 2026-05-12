@@ -4,6 +4,7 @@ import { HashRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import Submit from './form'
 import Graph from './graph'
+import Bubbles from './bubbles'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -12,6 +13,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/" element={<Submit />} />
         <Route path="/form" element={<Submit />} />
         <Route path="/graph" element={<Graph />} />
+        <Route path="/bubbles" element={<Bubbles />} />
       </Routes>
     </HashRouter>
   </StrictMode>
