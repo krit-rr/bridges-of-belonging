@@ -7,7 +7,7 @@ import Graph from './graph'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <HashRouter basename="/bridges-of-belonging">
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Submit />} />
         <Route path="/form" element={<Submit />} />
