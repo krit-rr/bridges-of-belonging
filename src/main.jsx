@@ -9,6 +9,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Submit />} />
         <Route path="/form" element={<Submit />} />
         <Route path="/graph" element={<Graph />} />
       </Routes>
