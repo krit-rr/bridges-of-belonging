@@ -7,7 +7,7 @@ import Graph from './graph'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/bridges-of-belonging">
       <Routes>
         <Route path="/" element={<Submit />} />
         <Route path="/form" element={<Submit />} />
