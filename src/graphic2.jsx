@@ -4,7 +4,7 @@ import { ref, onValue } from "firebase/database";
 import { db } from "./firebase";
 import * as d3 from "d3";
 
-export default function Graph() {
+export default function Graphic2() {
   const [shapers, setShapers] = useState([]);
   const [selected, setSelected] = useState(null);
   const svgRef = useRef();

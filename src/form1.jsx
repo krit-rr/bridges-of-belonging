@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ref, push } from "firebase/database";
 import { db } from "./firebase";
 
+// TODO: Edit and create fill in option
 const ISSUES = [
   "News fatigue / information overload",
   "Political polarization",
@@ -15,26 +16,11 @@ const ISSUES = [
   "Misinformation"
 ];
 
-const SKILLS = [
-  "Facilitation",
-  "Mental health support",
-  "Policy & advocacy",
-  "Community organizing",
-  "Storytelling & media",
-  "Tech & data",
-  "Research & writing",
-  "Network connections",
-  "Fundraising",
-  "Wellness practices"
-];
-
-export default function Submit() {
+export default function Form1() {
   const [name, setName] = useState("");
   const [hub, setHub] = useState("");
   const [email, setEmail] = useState("");
   const [issues, setIssues] = useState([]);
-  const [practice, setPractice] = useState("");
-  const [skills, setSkills] = useState([]);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -55,8 +41,6 @@ export default function Submit() {
       hub,
       email,
       issues,
-      practice,
-      skills,
       timestamp: Date.now()
     });
     setLoading(false);
@@ -67,7 +51,8 @@ export default function Submit() {
     return (
       <div style={styles.container}>
         <h1 style={styles.heading}>You're on the map</h1>
-        <p style={styles.sub}>Thanks {name} — look up at the screen to find yourself in the network.</p>
+        {/* // TODO: Replace with link to graphic */}
+        <p style={styles.sub}>Thanks {name} — Click here or look up to see uhhhh</p>
       </div>
     );
   }
@@ -96,7 +81,7 @@ export default function Submit() {
       <label style={styles.label}>Your Email</label>
       <input
         style={styles.input}
-        placeholder="For other Shapers to reach you"
+        placeholder="Don't forget which email you used!"
         value={email}
         onChange={e => setEmail(e.target.value)}
       />
@@ -117,37 +102,14 @@ export default function Submit() {
         ))}
       </div>
 
-      <label style={styles.label}>What's helped you stay engaged? (optional)</label>
-      <textarea
-        style={styles.textarea}
-        placeholder="A practice, mindset, resource, anything..."
-        value={practice}
-        onChange={e => setPractice(e.target.value)}
-      />
-
-      <label style={styles.label}>What can you offer the network? (pick all that apply)</label>
-      <div style={styles.tagGrid}>
-        {SKILLS.map(skill => (
-          <button
-            key={skill}
-            style={{
-              ...styles.tag,
-              ...(skills.includes(skill) ? styles.tagSelected : {})
-            }}
-            onClick={() => toggleItem(skills, setSkills, skill)}
-          >
-            {skill}
-          </button>
-        ))}
-      </div>
-
       <button
         style={styles.submit}
         onClick={handleSubmit}
         disabled={loading}
       >
-        {loading ? "Submitting..." : "Add me to the map →"}
+        {loading ? "Saving..." : "Add me to the network →"}
       </button>
+
     </div>
   );
 }

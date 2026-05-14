@@ -3,7 +3,7 @@ import { ref, onValue } from "firebase/database";
 import { db } from "./firebase";
 import * as d3 from "d3";
 
-export default function Bubbles() {
+export default function Graphic1() {
   const [issueCounts, setIssueCounts] = useState({});
   const [selected, setSelected] = useState(null);
   const [shapers, setShapers] = useState([]);
@@ -116,6 +116,7 @@ export default function Bubbles() {
       {selected && (
         <div style={styles.card}>
           <button style={styles.close} onClick={() => setSelected(null)}>✕</button>
+          {/* // TODO: Edit What Shows */}
           <h2 style={styles.cardTitle}>{selected.issue}</h2>
           <p style={styles.cardCount}>{selected.count} Shaper{selected.count !== 1 ? "s" : ""} feeling this</p>
           <div style={styles.shaperList}>
