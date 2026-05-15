@@ -14,12 +14,12 @@ export default function Home() {
         <p style={styles.sectionLabel}>PART 1 — What's Wrong?</p>
         <div style={styles.cardRow}>
           <button style={styles.card} onClick={() => navigate("/form1")}>
-            <span style={styles.cardTitle}>Share Your Issues</span>
+            <span style={styles.cardTitle}>[Form] Share Your Issues</span>
             <span style={styles.cardDesc}>What's been on your mind?</span>
           </button>
           <button style={styles.card} onClick={() => navigate("/graphic1")}>
-            <span style={styles.cardTitle}>See the Pressure Map</span>
-            <span style={styles.cardDesc}>What's weighing on the room</span>
+            <span style={styles.cardTitle}>[Visual] See the Pressure Map</span>
+            <span style={styles.cardDesc}>What's weighing on the room?</span>
           </button>
         </div>
       </div>
@@ -30,12 +30,12 @@ export default function Home() {
         <p style={styles.sectionLabel}>PART 2 — Connect & Solve</p>
         <div style={styles.cardRow}>
           <button style={styles.card} onClick={() => navigate("/form2")}>
-            <span style={styles.cardTitle}>Share Your Skills</span>
+            <span style={styles.cardTitle}>[Form] Share Your Skills</span>
             <span style={styles.cardDesc}>What can you offer the network?</span>
           </button>
           <button style={styles.card} onClick={() => navigate("/graphic2")}>
-            <span style={styles.cardTitle}>See the Network</span>
-            <span style={styles.cardDesc}>Who's connected to whom</span>
+            <span style={styles.cardTitle}>[Visual] See the Network</span>
+            <span style={styles.cardDesc}>Who can we connect? <br></br> What can we learn?</span>
           </button>
         </div>
       </div>
@@ -46,72 +46,86 @@ export default function Home() {
 const styles = {
   container: {
     minHeight: "100vh",
-    background: "#0f1f17",
-    padding: "48px 24px",
-    fontFamily: "sans-serif",
-    color: "#fff"
+    padding: "32px 24px",
+    fontFamily: "'Inter', sans-serif",
+    color: "#e8f4f8",
+    position: "relative"
   },
   hero: {
     textAlign: "center",
-    marginBottom: 48
+    marginBottom: 64
   },
   title: {
     fontSize: 36,
-    fontWeight: 800,
+    fontWeight: 700,
     margin: 0,
-    color: "#fff"
+    color: "#fff",
+    letterSpacing: "-0.5px",
+    background: "linear-gradient(135deg, #e8f4f8 0%, #93c5fd 50%, #c4b5fd 100%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    backgroundClip: "text"
   },
   subtitle: {
-    color: "#a8d5b5",
-    fontSize: 16,
-    marginTop: 8
+    color: "rgba(232, 244, 248, 0.5)",
+    fontSize: 24,
+    marginTop: 12,
+    letterSpacing: "0.05em"
   },
   section: {
-    maxWidth: 520,
-    margin: "0 auto 32px"
+    maxWidth: 760,
+    margin: "0 auto 56px"
   },
   sectionLabel: {
-    fontSize: 11,
-    fontWeight: 700,
-    letterSpacing: 2,
-    color: "#52b788",
+    fontSize: 24,
+    fontWeight: 600,
+    letterSpacing: "0.10em",
+    color: "#93c5fd",
     marginBottom: 16,
-    textTransform: "uppercase"
+    textAlign: "center",
+    textTransform: "uppercase",
   },
   cardRow: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: 16
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: 20
   },
   card: {
-    background: "#1b4332",
-    border: "1.5px solid #2d6a4f",
-    borderRadius: 16,
-    padding: "24px 16px",
+    background: "rgba(255, 255, 255, 0.04)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    borderRadius: 20,
+    padding: "14px 18px",
+    minHeight: 96,
     display: "flex",
     flexDirection: "column",
+    justifyContent: "center",
     alignItems: "center",
     gap: 8,
     cursor: "pointer",
-    color: "#fff",
-    transition: "background 0.2s"
-  },
-  cardIcon: {
-    fontSize: 32
+    color: "#e8f4f8",
+    transition: "all 0.2s ease",
+    backdropFilter: "blur(12px)",
+    boxShadow:
+      "0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)",
   },
   cardTitle: {
     fontWeight: 700,
-    fontSize: 15,
-    textAlign: "center"
+    fontSize: 17,
+    textAlign: "center",
+    color: "#e8f4f8",
+    lineHeight: 1.1,
+    whiteSpace: "nowrap",
   },
   cardDesc: {
-    fontSize: 12,
-    color: "#a8d5b5",
-    textAlign: "center"
+    fontSize: 14,
+    color: "rgba(232, 244, 248, 0.45)",
+    textAlign: "center",
+    lineHeight: 1.25,
+    maxWidth: 240,
   },
   divider: {
-    maxWidth: 520,
-    margin: "0 auto 32px",
-    borderTop: "1px solid #2d6a4f"
+    maxWidth: 540,
+    margin: "0 auto 40px",
+    borderTop: "1px solid rgba(255,255,255,0.06)"
   }
 };

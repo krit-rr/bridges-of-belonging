@@ -57,21 +57,19 @@ export default function Graphic1() {
 
     const nodes = pack(root).leaves();
 
-    const colorScale = d3
-      .scaleOrdinal()
-      .domain(data.map((d) => d.issue))
-      .range([
-        "#2d6a4f",
-        "#40916c",
-        "#52b788",
-        "#74c69d",
-        "#95d5b2",
-        "#b7e4c7",
-        "#1b4332",
-        "#081c15",
-        "#d8f3dc",
-        "#a8d5b5",
-      ]);
+    const colorScale = d3.scaleOrdinal().domain(data.map((d) => d.issue))
+    .range([
+      "#60a5fa",
+      "#818cf8",
+      "#a78bfa",
+      "#38bdf8",
+      "#22d3ee",
+      "#93c5fd",
+      "#c4b5fd",
+      "#7dd3fc",
+      "#2563eb",
+      "#6d28d9",
+    ]);
 
     const node = svg
       .append("g")
@@ -107,40 +105,44 @@ export default function Graphic1() {
       .attr("text-anchor", "middle")
       .attr("dy", "-0.2em")
       .attr("fill", "#fff")
-      .attr("font-size", (d) => Math.max(10, d.r / 4))
+      .attr("font-size", d => Math.min(14, d.r / 4))
       .attr("font-weight", "600")
+      .attr("font-family", "Inter, sans-serif")
       .style("pointer-events", "none")
-      .text((d) =>
-        d.r > 30 ? d.data.issue.split("/")[0].trim() : ""
-      );
-
-    node
-      .append("text")
-      .attr("text-anchor", "middle")
-      .attr("dy", "1.1em")
-      .attr("fill", "#fff")
-      .attr("font-size", (d) => Math.max(10, d.r / 4))
-      .style("pointer-events", "none")
-      .text((d) =>
-        d.r > 30
-          ? `${d.data.count} shaper${d.data.count !== 1 ? "s" : ""}`
-          : ""
-      );
+      .text(d => {
+        if (d.r < 30) return "";
+        const label = d.data.issue.split("/")[0].trim();
+        const maxChars = Math.floor(d.r / 4);
+        return label.length > maxChars ? label.slice(0, maxChars) + "…" : label;
+      });
+  node
+    .append("text")
+    .attr("text-anchor", "middle")
+    .attr("dy", "1.1em")
+    .attr("fill", "rgba(255,255,255,0.75)")
+    .attr("font-size", d => Math.min(12, d.r / 5))
+    .attr("font-family", "Inter, sans-serif")
+    .style("pointer-events", "none")
+    .text(d => d.r > 30 ? `${d.data.count} shaper${d.data.count !== 1 ? "s" : ""}` : "");
   }, [issueCounts, shapers]);
 
   return (
     <div
       style={{
-        background: "#0f1f17",
+        background: "#020b18",
         minHeight: "100vh",
         position: "relative",
       }}
     >
+    
+    <div style={styles.bgGlow1} />
+    <div style={styles.bgGlow2} />
+
       <div style={styles.header}>
         <h1 style={styles.title}>What's Weighing on Us</h1>
 
         <p style={styles.subtitle}>
-          Bigger bubble = more Shapers feeling it · Click to see who
+          Click to learn more information.
         </p>
       </div>
 
@@ -204,32 +206,42 @@ const styles = {
 
   title: {
     color: "#fff",
-    fontSize: 28,
-    fontWeight: 700,
+    fontSize: 32,
+    fontWeight: 800,
     margin: 0,
-    fontFamily: "sans-serif",
+    fontFamily: "'Inter', sans-serif",
+    background:
+      "linear-gradient(135deg, #e8f4f8 0%, #93c5fd 50%, #c4b5fd 100%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    backgroundClip: "text",
   },
 
   subtitle: {
-    color: "#a8d5b5",
+    color: "rgba(232, 244, 248, 0.45)",
     fontSize: 14,
-    marginTop: 4,
-    fontFamily: "sans-serif",
+    marginTop: 6,
+    fontFamily: "'Inter', sans-serif",
+    letterSpacing: "0.03em",
   },
 
   card: {
     position: "fixed",
     bottom: 32,
     right: 32,
-    width: 340,
-    background: "#fff",
-    borderRadius: 16,
+    width: 300,
+    background: "rgba(5, 20, 40, 0.92)",
+    backdropFilter: "blur(20px)",
+    borderRadius: 20,
     padding: 24,
-    boxShadow: "0 8px 40px rgba(0,0,0,0.3)",
-    fontFamily: "sans-serif",
+    boxShadow:
+      "0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)",
+    fontFamily: "'Inter', sans-serif",
     zIndex: 100,
-    maxHeight: "60vh",
+    maxHeight: "55vh",
     overflowY: "auto",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    color: "#e8f4f8",
   },
 
   close: {
@@ -240,29 +252,30 @@ const styles = {
     border: "none",
     fontSize: 16,
     cursor: "pointer",
-    color: "#888",
+    color: "rgba(232,244,248,0.5)",
   },
 
   cardTitle: {
     margin: "0 0 4px",
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 700,
+    color: "#e8f4f8",
   },
 
   cardCount: {
-    color: "#2d6a4f",
+    color: "#93c5fd",
     fontWeight: 600,
     fontSize: 14,
     marginBottom: 16,
   },
 
   sectionLabel: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: 700,
-    color: "#666",
-    marginBottom: 8,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: "0.12em",
+    color: "rgba(232, 244, 248, 0.35)",
+    margin: "14px 0 8px",
   },
 
   hubList: {
@@ -275,17 +288,18 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "8px 0",
-    borderBottom: "1px solid #eee",
+    padding: "10px 0",
+    borderBottom: "1px solid rgba(255,255,255,0.06)",
   },
 
   hubName: {
     fontWeight: 500,
     fontSize: 14,
+    color: "#e8f4f8",
   },
 
   hubCount: {
-    color: "#2d6a4f",
+    color: "#93c5fd",
     fontWeight: 600,
     fontSize: 13,
   },
@@ -300,7 +314,7 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    borderTop: "1px solid #f0f0f0",
+    borderTop: "1px solid rgba(255,255,255,0.06)",
     paddingTop: 12,
   },
 
@@ -308,22 +322,46 @@ const styles = {
     margin: 0,
     fontWeight: 600,
     fontSize: 14,
+    color: "#e8f4f8",
   },
 
   shaperHub: {
     margin: "2px 0 0",
-    color: "#888",
+    color: "rgba(232,244,248,0.5)",
     fontSize: 12,
   },
 
   reachOut: {
-    background: "#2d6a4f",
+    background: "linear-gradient(135deg, #1e40af, #6d28d9)",
     color: "#fff",
-    padding: "6px 12px",
-    borderRadius: 6,
+    padding: "8px 14px",
+    borderRadius: 10,
     textDecoration: "none",
     fontSize: 12,
-    fontWeight: 600,
+    fontWeight: 700,
     whiteSpace: "nowrap",
+    boxShadow: "0 4px 16px rgba(109, 40, 217, 0.3)",
+  },
+  bgGlow1: {
+    position: "absolute",
+    top: -200,
+    left: -150,
+    width: 500,
+    height: 500,
+    borderRadius: "50%",
+    background: "rgba(59,130,246,0.18)",
+    filter: "blur(120px)",
+    pointerEvents: "none",
+  },
+  bgGlow2: {
+    position: "absolute",
+    bottom: -200,
+    right: -150,
+    width: 500,
+    height: 500,
+    borderRadius: "50%",
+    background: "rgba(139,92,246,0.18)",
+    filter: "blur(120px)",
+    pointerEvents: "none",
   },
 };

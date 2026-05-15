@@ -167,43 +167,60 @@ const styles = {
   container: {
     maxWidth: 480,
     margin: "0 auto",
-    padding: "32px 20px",
-    fontFamily: "sans-serif",
-    color: "#1a1a1a"
+    padding: "48px 24px 80px",
+    fontFamily: "'Inter', sans-serif",
+    color: "#e8f4f8",
+    position: "relative"
   },
   heading: {
-    fontSize: 24,
-    fontWeight: 700,
-    marginBottom: 4
+    fontSize: 28,
+    fontWeight: 800,
+    marginBottom: 6,
+    background: "linear-gradient(135deg, #e8f4f8 0%, #93c5fd 100%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    backgroundClip: "text"
   },
   sub: {
-    color: "#555",
-    marginBottom: 24,
-    fontSize: 15
+    color: "rgba(232, 244, 248, 0.5)",
+    marginBottom: 32,
+    fontSize: 15,
+    lineHeight: 1.6
   },
   label: {
     display: "block",
     fontWeight: 600,
-    fontSize: 14,
+    fontSize: 13,
     marginBottom: 8,
-    marginTop: 20
+    marginTop: 24,
+    color: "rgba(232, 244, 248, 0.7)",
+    letterSpacing: "0.02em"
   },
   input: {
     width: "100%",
-    padding: "12px",
-    fontSize: 16,
-    border: "1.5px solid #ddd",
-    borderRadius: 8,
-    boxSizing: "border-box"
+    padding: "14px 16px",
+    fontSize: 15,
+    background: "rgba(255, 255, 255, 0.05)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    borderRadius: 12,
+    boxSizing: "border-box",
+    color: "#e8f4f8",
+    outline: "none",
+    fontFamily: "'Inter', sans-serif"
   },
   textarea: {
     width: "100%",
-    padding: "12px",
+    padding: "14px 16px",
     fontSize: 15,
-    border: "1.5px solid #ddd",
-    borderRadius: 8,
-    minHeight: 80,
-    boxSizing: "border-box"
+    background: "rgba(255, 255, 255, 0.05)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    borderRadius: 12,
+    minHeight: 90,
+    boxSizing: "border-box",
+    color: "#e8f4f8",
+    outline: "none",
+    fontFamily: "'Inter', sans-serif",
+    resize: "vertical"
   },
   tagGrid: {
     display: "flex",
@@ -211,28 +228,39 @@ const styles = {
     gap: 8
   },
   tag: {
-    padding: "8px 14px",
-    borderRadius: 20,
-    border: "1.5px solid #ddd",
-    background: "#fff",
+    padding: "9px 16px",
+    borderRadius: 24,
+    border: "1px solid rgba(255, 255, 255, 0.12)",
+    background: "rgba(255, 255, 255, 0.04)",
     fontSize: 13,
-    cursor: "pointer"
+    cursor: "pointer",
+    color: "rgba(232, 244, 248, 0.7)",
+    fontFamily: "'Inter', sans-serif",
+    transition: "all 0.15s"
   },
   tagSelected: {
-    background: "#2d6a4f",
-    color: "#fff",
-    borderColor: "#2d6a4f"
+    background: "rgba(147, 197, 253, 0.15)",
+    color: "#93c5fd",
+    borderColor: "rgba(147, 197, 253, 0.4)"
   },
   submit: {
-    marginTop: 32,
+    marginTop: 40,
     width: "100%",
     padding: "16px",
-    background: "#2d6a4f",
+    background: "linear-gradient(135deg, #1e40af, #6d28d9)",
     color: "#fff",
     border: "none",
-    borderRadius: 10,
+    borderRadius: 14,
     fontSize: 16,
-    fontWeight: 600,
-    cursor: "pointer"
+    fontWeight: 700,
+    cursor: "pointer",
+    fontFamily: "'Inter', sans-serif",
+    letterSpacing: "0.02em",
+    boxShadow: "0 4px 24px rgba(109, 40, 217, 0.3)"
+  },
+  error: {
+    color: "#fca5a5",
+    fontSize: 13,
+    marginTop: 8
   }
 };
