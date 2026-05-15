@@ -11,6 +11,7 @@ export default function Graphic1() {
 
   useEffect(() => {
     const shapersRef = ref(db, "shapers");
+
     onValue(shapersRef, (snapshot) => {
       const data = snapshot.val();
       if (!data) return;
@@ -19,11 +20,13 @@ export default function Graphic1() {
       setShapers(all);
 
       const counts = {};
-      all.forEach(s => {
-        s.issues?.forEach(issue => {
+
+      all.forEach((s) => {
+        s.issues?.forEach((issue) => {
           counts[issue] = (counts[issue] || 0) + 1;
         });
       });
+
       setIssueCounts(counts);
     });
   }, []);
@@ -34,7 +37,8 @@ export default function Graphic1() {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    const svg = d3.select(svgRef.current)
+    const svg = d3
+      .select(svgRef.current)
       .attr("width", width)
       .attr("height", height);
 
@@ -42,100 +46,144 @@ export default function Graphic1() {
 
     const data = Object.entries(issueCounts).map(([issue, count]) => ({
       issue,
-      count
+      count,
     }));
 
-    const pack = d3.pack()
-      .size([width, height])
-      .padding(20);
+    const pack = d3.pack().size([width, height]).padding(20);
 
-    const root = d3.hierarchy({ children: data })
-      .sum(d => d.count);
+    const root = d3
+      .hierarchy({ children: data })
+      .sum((d) => d.count);
 
     const nodes = pack(root).leaves();
 
-    const colorScale = d3.scaleOrdinal()
-      .domain(data.map(d => d.issue))
+    const colorScale = d3
+      .scaleOrdinal()
+      .domain(data.map((d) => d.issue))
       .range([
-        "#2d6a4f", "#40916c", "#52b788",
-        "#74c69d", "#95d5b2", "#b7e4c7",
-        "#1b4332", "#081c15", "#d8f3dc", "#a8d5b5"
+        "#2d6a4f",
+        "#40916c",
+        "#52b788",
+        "#74c69d",
+        "#95d5b2",
+        "#b7e4c7",
+        "#1b4332",
+        "#081c15",
+        "#d8f3dc",
+        "#a8d5b5",
       ]);
 
-    const node = svg.append("g")
+    const node = svg
+      .append("g")
       .selectAll("g")
       .data(nodes)
       .join("g")
-      .attr("transform", d => `translate(${d.x},${d.y})`)
+      .attr("transform", (d) => `translate(${d.x},${d.y})`)
       .style("cursor", "pointer")
       .on("click", (event, d) => {
-        const matching = shapers.filter(s =>
+        const matching = shapers.filter((s) =>
           s.issues?.includes(d.data.issue)
         );
-        setSelected({ issue: d.data.issue, count: d.data.count, shapers: matching });
+
+        setSelected({
+          issue: d.data.issue,
+          count: d.data.count,
+          shapers: matching,
+        });
       });
 
-    node.append("circle")
+    node
+      .append("circle")
       .attr("r", 0)
-      .attr("fill", d => colorScale(d.data.issue))
+      .attr("fill", (d) => colorScale(d.data.issue))
       .attr("opacity", 0.85)
       .transition()
       .duration(600)
       .delay((d, i) => i * 60)
-      .attr("r", d => d.r);
+      .attr("r", (d) => d.r);
 
-    node.append("text")
+    node
+      .append("text")
       .attr("text-anchor", "middle")
       .attr("dy", "-0.2em")
       .attr("fill", "#fff")
-      .attr("font-size", d => Math.max(10, d.r / 4))
+      .attr("font-size", (d) => Math.max(10, d.r / 4))
       .attr("font-weight", "600")
       .style("pointer-events", "none")
-      .text(d => d.r > 30 ? d.data.issue.split("/")[0].trim() : "");
+      .text((d) =>
+        d.r > 30 ? d.data.issue.split("/")[0].trim() : ""
+      );
 
-    node.append("text")
+    node
+      .append("text")
       .attr("text-anchor", "middle")
       .attr("dy", "1.1em")
       .attr("fill", "#fff")
-      .attr("font-size", d => Math.max(10, d.r / 4))
+      .attr("font-size", (d) => Math.max(10, d.r / 4))
       .style("pointer-events", "none")
-      .text(d => d.r > 30 ? `${d.data.count} shaper${d.data.count !== 1 ? "s" : ""}` : "");
-
-  }, [issueCounts]);
+      .text((d) =>
+        d.r > 30
+          ? `${d.data.count} shaper${d.data.count !== 1 ? "s" : ""}`
+          : ""
+      );
+  }, [issueCounts, shapers]);
 
   return (
-    <div style={{ background: "#0f1f17", minHeight: "100vh", position: "relative" }}>
-
+    <div
+      style={{
+        background: "#0f1f17",
+        minHeight: "100vh",
+        position: "relative",
+      }}
+    >
       <div style={styles.header}>
         <h1 style={styles.title}>What's Weighing on Us</h1>
-        <p style={styles.subtitle}>Bigger bubble = more Shapers feeling it · Click to see who</p>
+
+        <p style={styles.subtitle}>
+          Bigger bubble = more Shapers feeling it · Click to see who
+        </p>
       </div>
 
       <svg ref={svgRef} style={{ display: "block" }} />
 
       {selected && (
         <div style={styles.card}>
-          <button style={styles.close} onClick={() => setSelected(null)}>✕</button>
-          {/* // TODO: Edit What Shows */}
+          <button
+            style={styles.close}
+            onClick={() => setSelected(null)}
+          >
+            ✕
+          </button>
+
           <h2 style={styles.cardTitle}>{selected.issue}</h2>
-          <p style={styles.cardCount}>{selected.count} Shaper{selected.count !== 1 ? "s" : ""} feeling this</p>
-          <div style={styles.shaperList}>
-            {selected.shapers.map((s, i) => (
-              <div key={i} style={styles.shaperRow}>
-                <div>
-                  <p style={styles.shaperName}>{s.name}</p>
-                  <p style={styles.shaperHub}>📍 {s.hub}</p>
+
+          <p style={styles.cardCount}>
+            {selected.count} Shaper
+            {selected.count !== 1 ? "s" : ""} feeling this
+          </p>
+
+          <p style={styles.sectionLabel}>By Hub</p>
+
+          <div style={styles.hubList}>
+            {Object.entries(
+              selected.shapers.reduce((acc, s) => {
+                acc[s.hub] = (acc[s.hub] || 0) + 1;
+                return acc;
+              }, {})
+            )
+              .sort((a, b) => b[1] - a[1])
+              .map(([hub, count]) => (
+                <div key={hub} style={styles.hubRow}>
+                  <span style={styles.hubName}>
+                    📍 {hub}
+                  </span>
+
+                  <span style={styles.hubCount}>
+                    {count} shaper
+                    {count !== 1 ? "s" : ""}
+                  </span>
                 </div>
-                <a
-                    href={`mailto:${s.email}?subject=Bridges of Belonging&body=Hey ${
-                        s.name.split(" ")[0]
-                    }, I saw we're both feeling ${selected.issue} - would love to connect.`}
-                    style={styles.reachOut}
-                    >
-                    Reach out
-                    </a>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       )}
@@ -151,21 +199,24 @@ const styles = {
     right: 0,
     textAlign: "center",
     zIndex: 10,
-    pointerEvents: "none"
+    pointerEvents: "none",
   },
+
   title: {
     color: "#fff",
     fontSize: 28,
     fontWeight: 700,
     margin: 0,
-    fontFamily: "sans-serif"
+    fontFamily: "sans-serif",
   },
+
   subtitle: {
     color: "#a8d5b5",
     fontSize: 14,
     marginTop: 4,
-    fontFamily: "sans-serif"
+    fontFamily: "sans-serif",
   },
+
   card: {
     position: "fixed",
     bottom: 32,
@@ -178,8 +229,9 @@ const styles = {
     fontFamily: "sans-serif",
     zIndex: 100,
     maxHeight: "60vh",
-    overflowY: "auto"
+    overflowY: "auto",
   },
+
   close: {
     position: "absolute",
     top: 12,
@@ -188,41 +240,82 @@ const styles = {
     border: "none",
     fontSize: 16,
     cursor: "pointer",
-    color: "#888"
+    color: "#888",
   },
+
   cardTitle: {
     margin: "0 0 4px",
     fontSize: 18,
-    fontWeight: 700
+    fontWeight: 700,
   },
+
   cardCount: {
     color: "#2d6a4f",
     fontWeight: 600,
     fontSize: 14,
-    marginBottom: 16
+    marginBottom: 16,
   },
+
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: 700,
+    color: "#666",
+    marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+
+  hubList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+  },
+
+  hubRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "8px 0",
+    borderBottom: "1px solid #eee",
+  },
+
+  hubName: {
+    fontWeight: 500,
+    fontSize: 14,
+  },
+
+  hubCount: {
+    color: "#2d6a4f",
+    fontWeight: 600,
+    fontSize: 13,
+  },
+
   shaperList: {
     display: "flex",
     flexDirection: "column",
-    gap: 12
+    gap: 12,
   },
+
   shaperRow: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     borderTop: "1px solid #f0f0f0",
-    paddingTop: 12
+    paddingTop: 12,
   },
+
   shaperName: {
     margin: 0,
     fontWeight: 600,
-    fontSize: 14
+    fontSize: 14,
   },
+
   shaperHub: {
     margin: "2px 0 0",
     color: "#888",
-    fontSize: 12
+    fontSize: 12,
   },
+
   reachOut: {
     background: "#2d6a4f",
     color: "#fff",
@@ -231,6 +324,6 @@ const styles = {
     textDecoration: "none",
     fontSize: 12,
     fontWeight: 600,
-    whiteSpace: "nowrap"
-  }
+    whiteSpace: "nowrap",
+  },
 };
