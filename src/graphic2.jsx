@@ -92,7 +92,7 @@ export default function Graphic2() {
       .domain(hubs)
       .range(HUB_COLORS);
 
-    const nodeRadius = (d) => 20 + d.connections * 4;
+    const nodeRadius = (d) => 10 + Math.min(d.connections * 1.8, 14);
 
     const simulation = d3
       .forceSimulation(nodes)
@@ -154,19 +154,19 @@ export default function Graphic2() {
       );
 
     // Pulse Ring
-    node
-      .append("circle")
-      .attr("r", (d) => nodeRadius(d))
-      .attr("fill", "none")
-      .attr("stroke", (d) => colorScale(d.hub))
-      .attr("stroke-width", 2)
-      .attr("opacity", 0.5)
-      .transition()
-      .duration(1000)
-      .delay((d, i) => i * 80)
-      .attr("r", (d) => nodeRadius(d) + 14)
-      .attr("opacity", 0)
-      .ease(d3.easeExpOut);
+    // node
+    //   .append("circle")
+    //   .attr("r", (d) => nodeRadius(d))
+    //   .attr("fill", "none")
+    //   .attr("stroke", (d) => colorScale(d.hub))
+    //   .attr("stroke-width", 2)
+    //   .attr("opacity", 0.5)
+    //   .transition()
+    //   .duration(1000)
+    //   .delay((d, i) => i * 80)
+    //   .attr("r", (d) => nodeRadius(d) + 14)
+    //   .attr("opacity", 0)
+    //   .ease(d3.easeExpOut);
 
     // Main Circle
     node

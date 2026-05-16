@@ -26,7 +26,6 @@ export default function Form2() {
   const [openToConnect, setOpenToConnect] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const [customSkill, setCustomSkill] = useState("");
   const [customSkills, setCustomSkills] = useState([]);
 
