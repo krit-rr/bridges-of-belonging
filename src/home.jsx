@@ -13,11 +13,11 @@ export default function Home() {
       <div style={styles.section}>
         <p style={styles.sectionLabel}>PART 1 — What's Wrong?</p>
         <div style={styles.cardRow}>
-          <button style={styles.card} onClick={() => navigate("/bridges_of_belonging/#/form1")}>
+          <button style={styles.card} onClick={() => navigate("/form1")}>
             <span style={styles.cardTitle}>[Form] Share Your Issues</span>
             <span style={styles.cardDesc}>What's been on your mind?</span>
           </button>
-          <button style={styles.card} onClick={() => navigate("/bridges_of_belonging/#/graphic1")}>
+          <button style={styles.card} onClick={() => navigate("/graphic1")}>
             <span style={styles.cardTitle}>[Visual] See the Pressure Map</span>
             <span style={styles.cardDesc}>What's weighing on the room?</span>
           </button>
@@ -29,11 +29,11 @@ export default function Home() {
       <div style={styles.section}>
         <p style={styles.sectionLabel}>PART 2 — Connect & Solve</p>
         <div style={styles.cardRow}>
-          <button style={styles.card} onClick={() => navigate("/bridges_of_belonging/#/form2")}>
+          <button style={styles.card} onClick={() => navigate("/form2")}>
             <span style={styles.cardTitle}>[Form] Share Your Skills</span>
             <span style={styles.cardDesc}>What can you offer the network?</span>
           </button>
-          <button style={styles.card} onClick={() => navigate("/bridges_of_belonging/#/graphic2")}>
+          <button style={styles.card} onClick={() => navigate("/graphic2")}>
             <span style={styles.cardTitle}>[Visual] See the Network</span>
             <span style={styles.cardDesc}>Who can we connect? <br></br> What can we learn?</span>
           </button>
