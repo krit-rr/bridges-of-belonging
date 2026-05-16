@@ -2,18 +2,17 @@ import { useState } from "react";
 import { ref, query, orderByChild, equalTo, onValue, update } from "firebase/database";
 import { db } from "./firebase";
 
-// TODO: Edit these
 const SKILLS = [
-  "Facilitation",
-  "Mental health support",
-  "Policy & advocacy",
+  "Project design & ideation",
+  "Fundraising & grant writing",
   "Community organizing",
-  "Storytelling & media",
-  "Tech & data",
-  "Research & writing",
-  "Network connections",
-  "Fundraising",
-  "Wellness practices",
+  "Cross-hub collaboration",
+  "Mental health & peer support",
+  "Storytelling & communications",
+  "Policy & advocacy",
+  "Tech & digital tools",
+  "Event planning & facilitation",
+  "Connecting people across networks"
 ];
 
 export default function Form2() {

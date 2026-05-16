@@ -2,18 +2,17 @@ import { useState } from "react";
 import { ref, push } from "firebase/database";
 import { db } from "./firebase";
 
-// TODO: Edit these
 const ISSUES = [
-  "News fatigue / information overload",
-  "Political polarization",
-  "Climate anxiety",
-  "Community disconnect",
-  "Local vs. global focus tension",
-  "Economic uncertainty",
-  "Mental health & burnout",
-  "Civic engagement fatigue",
-  "Identity & belonging",
-  "Misinformation"
+  "Staying motivated between projects",
+  "Feeling disconnected from other hubs",
+  "Balancing shaper work with personal life",
+  "Not knowing how to turn ideas into impact",
+  "Feeling like my hub isn't doing enough",
+  "Burnout from world events",
+  "Lack of resources or funding",
+  "Navigating organizational bureaucracy",
+  "Feeling isolated as a young leader",
+  "Uncertainty about my role as a shaper"
 ];
 
 export default function Form1() {
