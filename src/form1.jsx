@@ -87,7 +87,7 @@ export default function Form1() {
       <label style={styles.label}>Your Email</label>
       <input
         style={styles.input}
-        placeholder="Don't forget which email you used!"
+        placeholder="Don't forget which email you use!"
         value={email}
         onChange={e => setEmail(e.target.value)}
       />
