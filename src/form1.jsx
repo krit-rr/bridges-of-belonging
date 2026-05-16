@@ -71,7 +71,7 @@ export default function Form1() {
       <label style={styles.label}>Your Name</label>
       <input
         style={styles.input}
-        placeholder="First and last name"
+        placeholder=" "
         value={name}
         onChange={e => setName(e.target.value)}
       />
