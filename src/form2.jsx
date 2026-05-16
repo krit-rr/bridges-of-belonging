@@ -108,7 +108,7 @@ export default function Form2() {
         <button
           style={styles.submit}
           onClick={() =>
-            (window.location.href = "/#/graphic2")
+            (window.location.href = "bridges_of_belonging/#/graphic2")
           }
         >
           See the Network →

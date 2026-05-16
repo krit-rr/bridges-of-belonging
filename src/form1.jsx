@@ -55,7 +55,7 @@ export default function Form1() {
         <p style={styles.sub}>Look up at the screen to see the pressure map (or click below).</p>
         <button
           style={styles.submit}
-          onClick={() => window.location.href = "/#/graphic1"}
+          onClick={() => window.location.href = "bridges_of_belonging/#/graphic1"}
         >
           See the Pressure Map →
         </button>
