@@ -97,21 +97,30 @@ export default function Form2() {
   if (step === "done") {
     return (
       <div style={styles.container}>
-        <h1 style={styles.heading}>You're in the network</h1>
+        <h1 style={styles.heading}>Thanks {shaperName.split(" ")[0]}! You're in.</h1>
 
         <p style={styles.sub}>
-          Thanks {shaperName.split(" ")[0]}! Click or look up to
-          see your connections.
+          Click to see your connections and resources, or navigate back home.
         </p>
 
         <button
           style={styles.submit}
           onClick={() =>
-            (window.location.href = "bridges_of_belonging/#/graphic2")
+            (window.location.href = "/#/graphic2")
           }
         >
-          See the Network →
+          Connections and Resources →
         </button>
+
+        <button
+          style={styles.submit}
+          onClick={() =>
+            (window.location.href = "/")
+          }
+        >
+          Home →
+        </button>
+        
       </div>
     );
   }

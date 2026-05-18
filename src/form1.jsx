@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ref, push } from "firebase/database";
+import { ref, push, query, orderByChild, equalTo, onValue, update } from "firebase/database";
 import { db } from "./firebase";
 
 const ISSUES = [
@@ -37,27 +37,54 @@ export default function Form1() {
       return;
     }
     setLoading(true);
-    await push(ref(db, "shapers"), {
-      name,
-      hub,
-      email: email.trim().toLowerCase(),
-      issues,
-      timestamp: Date.now()
-    });
-    setLoading(false);
-    setSubmitted(true);
+
+    const email_normalized = email.trim().toLowerCase();
+
+    // Check if email already exists
+    const shapersRef = query(
+      ref(db, "shapers"),
+      orderByChild("email"),
+      equalTo(email_normalized)
+    );
+
+    onValue(shapersRef, async (snapshot) => {
+      const data = snapshot.val();
+
+      if (data) {
+        const key = Object.keys(data)[0];
+        const existing = Object.values(data)[0];
+
+        // Merge issues — combine old and new, remove duplicates
+        const mergedIssues = [...new Set([...(existing.issues || []), ...issues])];
+
+        await update(ref(db, `shapers/${key}`), {
+          name,
+          hub,
+          email: email_normalized,
+          issues: mergedIssues,
+          timestamp: Date.now()
+        });
+      }
+      setLoading(false);
+      setSubmitted(true);
+    }, { onlyOnce: true });
   };
 
   if (submitted) {
     return (
       <div style={styles.container}>
-        <h1 style={styles.heading}>Thanks {name}!</h1>
-        <p style={styles.sub}>Look up at the screen to see the pressure map (or click below).</p>
+        <h1 style={styles.heading}>Thank you {name}! Form #1 submitted successfully.</h1>
+        <p style={styles.sub}>Click below to see the pressure map, or fill out the other form.</p>
         <button
           style={styles.submit}
-          onClick={() => window.location.href = "bridges_of_belonging/#/graphic1"}
-        >
-          See the Pressure Map →
+          onClick={() => window.location.href = "/#/graphic1"} >
+          Pressure Map →
+        </button>
+        
+        <button
+          style={styles.submit}
+          onClick={() => window.location.href = "/#/form2"} >
+          Form 2 →
         </button>
       </div>
     );

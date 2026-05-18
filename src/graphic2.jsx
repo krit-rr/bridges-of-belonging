@@ -19,6 +19,7 @@ export default function Graphic2() {
   const [shapers, setShapers] = useState([]);
   const [selected, setSelected] = useState(null);
   const svgRef = useRef();
+  const [legendOpen, setLegendOpen] = useState(false);
 
   useEffect(() => {
     const shapersRef = ref(db, "shapers");
@@ -232,6 +233,17 @@ export default function Graphic2() {
       }, I saw we're both navigating some of the same things at the retreat - would love to connect.`
     : "#";
 
+  const isValidUrl = (str) => {
+    if (!str || str.includes(" ")) return false;
+    if (!str.match(/\.(com|org|net|edu|gov|io|co|us|uk|me|app|dev|ai|ly|link|info|tech|gg)(\/.*)?(#.*)?$/i)) return false;
+    try {
+      new URL(str.startsWith("http") ? str : `https://${str}`);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   return (
     <div
       style={{
@@ -281,22 +293,30 @@ export default function Graphic2() {
       {shapers.some((s) => s.link) && (
         <div style={styles.sidebarRight}>
           <h3 style={styles.sidebarTitle}>Resources Shared</h3>
+
           <div style={styles.practiceList}>
             {shapers
-              .filter((s) => s.link).map((s, i) => (
+              .filter((s) => s.link)
+              .map((s, i) => (
                 <div key={i} style={styles.practiceItem}>
-                  <a
-                    href={
-                      s.link.startsWith("http")
-                        ? s.link
-                        : `https://${s.link}`
-                    }
-                    target="_blank"
-                    rel="noreferrer"
-                    style={styles.resourceLink}
-                  >
-                    {s.link}
-                  </a>
+                  {isValidUrl(s.link) ? (
+                    <a
+                      href={
+                        s.link.startsWith("http")
+                          ? s.link
+                          : `https://${s.link}`
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                      style={styles.resourceLink}
+                    >
+                      {s.link}
+                    </a>
+                  ) : (
+                    <p style={styles.practiceText}>
+                      {s.link}
+                    </p>
+                  )}
 
                   <p style={styles.practiceName}>
                     — {s.name}, {s.hub}
@@ -306,72 +326,67 @@ export default function Graphic2() {
           </div>
         </div>
       )}
-
-      {/* Legend — Bottom Left */}
+      
+      {/* Legend */}
       {hubs.length > 0 && (
         <div style={styles.legend}>
-          <p style={styles.legendTitle}>Hubs</p>
-          <div style={styles.legendRow}>
-            {hubs.map((hub, i) => (
-              <div key={hub} style={styles.legendItem}>
-                <div style={{
+          <button
+            style={styles.legendToggle}
+            onClick={() => setLegendOpen(prev => !prev)}
+          >
+            <div style={styles.legendDotRow}>
+              {hubs.slice(0, 3).map((hub, i) => (
+                <div key={hub} style={{
                   ...styles.legendDot,
                   background: HUB_COLORS[i % HUB_COLORS.length]
                 }} />
-                <span style={styles.legendLabel}>{hub}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+              {hubs.length > 3 && (
+                <span style={styles.legendMore}>+{hubs.length - 3}</span>
+              )}
+            </div>
+            <span style={styles.legendToggleLabel}>
+              Hubs {legendOpen ? "▲" : "▼"}
+            </span>
+          </button>
+
+          {legendOpen && (
+            <div style={styles.legendExpanded}>
+              {hubs.map((hub, i) => (
+                <div key={hub} style={styles.legendItem}>
+                  <div style={{
+                    ...styles.legendDot,
+                    background: HUB_COLORS[i % HUB_COLORS.length]
+                  }} />
+                  <span style={styles.legendLabel}>{hub}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* Profile Card */}
       {selected && (
         <div style={styles.card}>
-          <button
-            style={styles.close}
-            onClick={() => setSelected(null)}
-          >
-            ✕
-          </button>
+          <button style={styles.close} onClick={() => setSelected(null)}>✕</button>
 
-          <h2 style={styles.cardName}>
-            {selected.name}
-          </h2>
+          <h2 style={styles.cardName}>{selected.name}</h2>
+          <p style={styles.cardHub}>📍 {selected.hub}</p>
 
-          <p style={styles.cardHub}>
-            📍 {selected.hub}
-          </p>
-
-          <p style={styles.cardLabel}>
-            Weighing on them
-          </p>
-
+          <p style={styles.cardLabel}>Weighing on them</p>
           <div style={styles.tagRow}>
             {selected.issues?.map((i) => (
-              <span
-                key={i}
-                style={styles.tagIssue}
-              >
-                {i}
-              </span>
+              <span key={i} style={styles.tagIssue}>{i}</span>
             ))}
           </div>
 
           {selected.skills?.length > 0 && (
             <div>
-              <p style={styles.cardLabel}>
-                They can offer
-              </p>
-
+              <p style={styles.cardLabel}>They can offer</p>
               <div style={styles.tagRow}>
                 {selected.skills.map((s) => (
-                  <span
-                    key={s}
-                    style={styles.tagSkill}
-                  >
-                    {s}
-                  </span>
+                  <span key={s} style={styles.tagSkill}>{s}</span>
                 ))}
               </div>
             </div>
@@ -379,49 +394,35 @@ export default function Graphic2() {
 
           {selected.practice && (
             <div>
-              <p style={styles.cardLabel}>
-                What's helped them
-              </p>
-
-              <p style={styles.cardPractice}>
-                "{selected.practice}"
-              </p>
+              <p style={styles.cardLabel}>What's helped them</p>
+              <p style={styles.cardPractice}>"{selected.practice}"</p>
             </div>
           )}
 
           {selected.link && (
             <div>
-              <p style={styles.cardLabel}>
-                Resource they shared
-              </p>
-
-              <a
-                href={
-                  selected.link.startsWith("http")
-                    ? selected.link
-                    : `https://${selected.link}`
-                }
-                target="_blank"
-                rel="noreferrer"
-                style={styles.resourceLink}
-              >
-                {selected.link}
-              </a>
+              <p style={styles.cardLabel}>Resource they shared</p>
+              {isValidUrl(selected.link) ? (
+                <a
+                  href={selected.link.startsWith("http") ? selected.link : `https://${selected.link}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={styles.resourceLink}
+                >
+                  {selected.link}
+                </a>
+              ) : (
+                <p style={{ ...styles.cardPractice, fontStyle: "normal" }}>{selected.link}</p>
+              )}
             </div>
           )}
 
           {selected.openToConnect !== false ? (
-            <a
-              href={emailHref}
-              style={styles.emailBtn}
-            >
-              Reach out to{" "}
-              {selected.name.split(" ")[0]} →
+            <a href={emailHref} style={styles.emailBtn}>
+              Reach out to {selected.name.split(" ")[0]} &#8594;
             </a>
           ) : (
-            <p style={styles.notConnecting}>
-              Not available to connect right now
-            </p>
+            <p style={styles.notConnecting}>Not available to connect right now</p>
           )}
         </div>
       )}
@@ -490,7 +491,7 @@ const styles = {
     borderRadius: 20,
     padding: 20,
     zIndex: 50,
-    maxHeight: "70vh",
+    maxHeight: "80vh",
     overflowY: "auto",
     border: "1px solid rgba(255, 255, 255, 0.08)",
     boxShadow: "0 8px 32px rgba(0,0,0,0.4)"
@@ -505,7 +506,7 @@ const styles = {
     borderRadius: 20,
     padding: 20,
     zIndex: 50,
-    maxHeight: "70vh",
+    maxHeight: "80vh",
     overflowY: "auto",
     border: "1px solid rgba(255, 255, 255, 0.08)",
     boxShadow: "0 8px 32px rgba(0,0,0,0.4)"
@@ -549,43 +550,68 @@ const styles = {
   legend: {
     position: "fixed",
     bottom: 24,
-    left: 24,
+    left: "50%",
+    transform: "translateX(-50%)",
     background: "rgba(5, 20, 40, 0.8)",
     backdropFilter: "blur(16px)",
     borderRadius: 16,
-    padding: "14px 20px",
+    padding: "10px 14px",
     zIndex: 50,
     border: "1px solid rgba(255, 255, 255, 0.08)",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.4)"
+    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+    maxWidth: 200
   },
-  legendRow: {
+  legendToggle: {
     display: "flex",
-    flexWrap: "wrap",
-    gap: "8px 16px"
+    alignItems: "center",
+    gap: 10,
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    padding: 0,
+    width: "100%"
   },
-  legendTitle: {
-    color: "rgba(232, 244, 248, 0.45)",
-    fontSize: 10,
+  legendToggleLabel: {
+    color: "rgba(232, 244, 248, 0.5)",
+    fontSize: 11,
     fontWeight: 700,
     textTransform: "uppercase",
-    letterSpacing: "0.12em",
-    margin: "0 0 12px",
+    letterSpacing: "0.1em",
+    fontFamily: "'Inter', sans-serif"
+  },
+  legendDotRow: {
+    display: "flex",
+    gap: 4,
+    alignItems: "center"
+  },
+  legendMore: {
+    color: "rgba(232, 244, 248, 0.4)",
+    fontSize: 10,
+    fontFamily: "'Inter', sans-serif"
+  },
+  legendExpanded: {
+    marginTop: 12,
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+    paddingTop: 12,
+    borderTop: "1px solid rgba(255,255,255,0.06)"
   },
   legendItem: {
     display: "flex",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 8,
+    gap: 8
   },
   legendDot: {
-    width: 10,
-    height: 10,
+    width: 8,
+    height: 8,
     borderRadius: "50%",
-    flexShrink: 0,
+    flexShrink: 0
   },
   legendLabel: {
     color: "#e8f4f8",
     fontSize: 13,
+    fontFamily: "'Inter', sans-serif"
   },
   card: {
     position: "fixed",
