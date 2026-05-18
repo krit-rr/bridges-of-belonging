@@ -35,7 +35,7 @@ export default function Graphic2() {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    const centerX = width / 2 + 40;
+    const centerX = width / 2;
     const centerY = height / 2 + 20;
 
     const svg = d3
@@ -135,7 +135,7 @@ export default function Graphic2() {
           .drag()
           .on("start", (event, d) => {
             if (!event.active)
-              simulation.alphaTarget(0.3).restart();
+              simulation.alphaTarget(0.3).restart(); 
 
             d.fx = d.x;
             d.fy = d.y;
@@ -204,16 +204,8 @@ export default function Graphic2() {
     simulation.on("tick", () => {
       nodes.forEach((d) => {
         const r = nodeRadius(d);
-
-        d.x = Math.max(
-          300,
-          Math.min(width - 220, d.x)
-        );
-
-        d.y = Math.max(
-          80 + r,
-          Math.min(height - r - 20, d.y)
-        );
+        d.x = Math.max(260, Math.min(width - 260, d.x));
+        d.y = Math.max(80 + r, Math.min(height - r - 80, d.y));
       });
 
       svg
@@ -270,100 +262,66 @@ export default function Graphic2() {
         style={{ display: "block" }}
       />
 
-      {/* Sidebar */}
-      {(shapers.some((s) => s.practice) ||
-        shapers.some((s) => s.link)) && (
-        <div style={styles.sidebar}>
-          {shapers.some((s) => s.practice) && (
-            <div>
-              <h3 style={styles.sidebarTitle}>
-                Your Tips
-              </h3>
-
-              <div style={styles.practiceList}>
-                {shapers
-                  .filter((s) => s.practice)
-                  .map((s, i) => (
-                    <div
-                      key={i}
-                      style={styles.practiceItem}
-                    >
-                      <p style={styles.practiceText}>
-                        "{s.practice}"
-                      </p>
-
-                      <p style={styles.practiceName}>
-                        — {s.name}, {s.hub}
-                      </p>
-                    </div>
-                  ))}
+      {/* Tips Sidebar — Left */}
+      {shapers.some((s) => s.practice) && (
+        <div style={styles.sidebarLeft}>
+          <h3 style={styles.sidebarTitle}>Your Tips</h3>
+          <div style={styles.practiceList}>
+            {shapers.filter((s) => s.practice).map((s, i) => (
+              <div key={i} style={styles.practiceItem}>
+                <p style={styles.practiceText}>"{s.practice}"</p>
+                <p style={styles.practiceName}>— {s.name}, {s.hub}</p>
               </div>
-            </div>
-          )}
-
-          {shapers.some((s) => s.link) && (
-            <div style={{ marginTop: 24 }}>
-              <h3 style={styles.sidebarTitle}>
-                Resources Shared
-              </h3>
-
-              <div style={styles.practiceList}>
-                {shapers
-                  .filter((s) => s.link)
-                  .map((s, i) => (
-                    <div
-                      key={i}
-                      style={styles.practiceItem}
-                    >
-                      <a
-                        href={
-                          s.link.startsWith("http")
-                            ? s.link
-                            : `https://${s.link}`
-                        }
-                        target="_blank"
-                        rel="noreferrer"
-                        style={styles.resourceLink}
-                      >
-                        {s.link}
-                      </a>
-
-                      <p style={styles.practiceName}>
-                        — {s.name}, {s.hub}
-                      </p>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Legend */}
+      {/* Resources Sidebar — Right */}
+      {shapers.some((s) => s.link) && (
+        <div style={styles.sidebarRight}>
+          <h3 style={styles.sidebarTitle}>Resources Shared</h3>
+          <div style={styles.practiceList}>
+            {shapers
+              .filter((s) => s.link).map((s, i) => (
+                <div key={i} style={styles.practiceItem}>
+                  <a
+                    href={
+                      s.link.startsWith("http")
+                        ? s.link
+                        : `https://${s.link}`
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                    style={styles.resourceLink}
+                  >
+                    {s.link}
+                  </a>
+
+                  <p style={styles.practiceName}>
+                    — {s.name}, {s.hub}
+                  </p>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Legend — Bottom Left */}
       {hubs.length > 0 && (
         <div style={styles.legend}>
           <p style={styles.legendTitle}>Hubs</p>
-
-          {hubs.map((hub, i) => (
-            <div
-              key={hub}
-              style={styles.legendItem}
-            >
-              <div
-                style={{
+          <div style={styles.legendRow}>
+            {hubs.map((hub, i) => (
+              <div key={hub} style={styles.legendItem}>
+                <div style={{
                   ...styles.legendDot,
-                  background:
-                    HUB_COLORS[
-                      i % HUB_COLORS.length
-                    ],
-                }}
-              />
-
-              <span style={styles.legendLabel}>
-                {hub}
-              </span>
-            </div>
-          ))}
+                  background: HUB_COLORS[i % HUB_COLORS.length]
+                }} />
+                <span style={styles.legendLabel}>{hub}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -483,7 +441,6 @@ const styles = {
     filter: "blur(120px)",
     pointerEvents: "none",
   },
-
   bgGlow2: {
     position: "absolute",
     bottom: -200,
@@ -495,7 +452,6 @@ const styles = {
     filter: "blur(120px)",
     pointerEvents: "none",
   },
-
   header: {
     position: "absolute",
     top: 24,
@@ -505,7 +461,6 @@ const styles = {
     zIndex: 10,
     pointerEvents: "none",
   },
-
   title: {
     color: "#fff",
     fontSize: 32,
@@ -518,7 +473,6 @@ const styles = {
     WebkitTextFillColor: "transparent",
     backgroundClip: "text",
   },
-
   subtitle: {
     color: "rgba(232, 244, 248, 0.45)",
     fontSize: 14,
@@ -526,12 +480,11 @@ const styles = {
     fontFamily: "'Inter', sans-serif",
     letterSpacing: "0.03em",
   },
-
-  sidebar: {
+  sidebarLeft: {
     position: "fixed",
     top: 80,
     left: 24,
-    width: 240,
+    width: 220,
     background: "rgba(5, 20, 40, 0.8)",
     backdropFilter: "blur(16px)",
     borderRadius: 20,
@@ -539,12 +492,24 @@ const styles = {
     zIndex: 50,
     maxHeight: "70vh",
     overflowY: "auto",
-    border:
-      "1px solid rgba(255, 255, 255, 0.08)",
-    boxShadow:
-      "0 8px 32px rgba(0,0,0,0.4)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.4)"
   },
-
+  sidebarRight: {
+    position: "fixed",
+    top: 80,
+    right: 24,
+    width: 220,
+    background: "rgba(5, 20, 40, 0.8)",
+    backdropFilter: "blur(16px)",
+    borderRadius: 20,
+    padding: 20,
+    zIndex: 50,
+    maxHeight: "70vh",
+    overflowY: "auto",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.4)"
+  },
   sidebarTitle: {
     color: "rgba(232, 244, 248, 0.45)",
     fontSize: 10,
@@ -553,19 +518,16 @@ const styles = {
     letterSpacing: "0.12em",
     margin: "0 0 16px",
   },
-
   practiceList: {
     display: "flex",
     flexDirection: "column",
     gap: 16,
   },
-
   practiceItem: {
     borderLeft:
       "2px solid rgba(147, 197, 253, 0.5)",
     paddingLeft: 12,
   },
-
   practiceText: {
     color: "#e8f4f8",
     fontSize: 13,
@@ -573,35 +535,34 @@ const styles = {
     margin: "0 0 4px",
     lineHeight: 1.5,
   },
-
   practiceName: {
     color: "rgba(232, 244, 248, 0.5)",
     fontSize: 11,
     margin: 0,
   },
-
   resourceLink: {
     color: "#93c5fd",
     fontSize: 12,
     wordBreak: "break-all",
     textDecoration: "underline",
   },
-
   legend: {
     position: "fixed",
-    top: 80,
-    right: 24,
+    bottom: 24,
+    left: 24,
     background: "rgba(5, 20, 40, 0.8)",
     backdropFilter: "blur(16px)",
     borderRadius: 16,
-    padding: "16px 20px",
+    padding: "14px 20px",
     zIndex: 50,
-    border:
-      "1px solid rgba(255, 255, 255, 0.08)",
-    boxShadow:
-      "0 8px 32px rgba(0,0,0,0.4)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.4)"
   },
-
+  legendRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px 16px"
+  },
   legendTitle: {
     color: "rgba(232, 244, 248, 0.45)",
     fontSize: 10,
@@ -610,26 +571,22 @@ const styles = {
     letterSpacing: "0.12em",
     margin: "0 0 12px",
   },
-
   legendItem: {
     display: "flex",
     alignItems: "center",
     gap: 8,
     marginBottom: 8,
   },
-
   legendDot: {
     width: 10,
     height: 10,
     borderRadius: "50%",
     flexShrink: 0,
   },
-
   legendLabel: {
     color: "#e8f4f8",
     fontSize: 13,
   },
-
   card: {
     position: "fixed",
     bottom: 32,
@@ -649,7 +606,6 @@ const styles = {
       "1px solid rgba(255, 255, 255, 0.1)",
     color: "#e8f4f8",
   },
-
   close: {
     position: "absolute",
     top: 12,
@@ -660,20 +616,17 @@ const styles = {
     cursor: "pointer",
     color: "rgba(232,244,248,0.5)",
   },
-
   cardName: {
     margin: "0 0 4px",
     fontSize: 20,
     fontWeight: 700,
     color: "#e8f4f8",
   },
-
   cardHub: {
     margin: "0 0 16px",
     color: "rgba(232, 244, 248, 0.5)",
     fontSize: 14,
   },
-
   cardLabel: {
     fontSize: 10,
     fontWeight: 700,
@@ -682,13 +635,11 @@ const styles = {
     color: "rgba(232, 244, 248, 0.35)",
     margin: "14px 0 8px",
   },
-
   tagRow: {
     display: "flex",
     flexWrap: "wrap",
     gap: 6,
   },
-
   tagIssue: {
     background:
       "rgba(147, 197, 253, 0.1)",
@@ -699,7 +650,6 @@ const styles = {
     padding: "4px 10px",
     fontSize: 12,
   },
-
   tagSkill: {
     background:
       "rgba(196, 181, 253, 0.1)",
@@ -710,14 +660,12 @@ const styles = {
     padding: "4px 10px",
     fontSize: 12,
   },
-
   cardPractice: {
     fontStyle: "italic",
     color: "rgba(232,244,248,0.8)",
     fontSize: 14,
     lineHeight: 1.6,
   },
-
   emailBtn: {
     display: "block",
     marginTop: 20,
@@ -733,7 +681,6 @@ const styles = {
     boxShadow:
       "0 4px 16px rgba(109, 40, 217, 0.3)",
   },
-
   notConnecting: {
     marginTop: 20,
     textAlign: "center",

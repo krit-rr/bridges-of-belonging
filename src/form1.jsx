@@ -40,7 +40,7 @@ export default function Form1() {
     await push(ref(db, "shapers"), {
       name,
       hub,
-      email,
+      email: email.trim().toLowerCase(),
       issues,
       timestamp: Date.now()
     });
