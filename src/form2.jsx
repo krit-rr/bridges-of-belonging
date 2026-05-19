@@ -105,8 +105,7 @@ export default function Form2() {
 
         <button
           style={styles.submit}
-          onClick={() =>
-            (window.location.href = "/#/graphic2")
+          onClick={() => (window.location.href = "/#/graphic2")
           }
         >
           Connections and Resources →
@@ -114,8 +113,7 @@ export default function Form2() {
 
         <button
           style={styles.submit}
-          onClick={() =>
-            (window.location.href = "/")
+          onClick={() => (window.location.href = "/#/")
           }
         >
           Home →
