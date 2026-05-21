@@ -3,38 +3,59 @@ import { ref, onValue } from "firebase/database";
 import { db } from "./firebase";
 import * as d3 from "d3";
 
-const HUB_COLORS = [
-  "#60a5fa",
-  "#818cf8",
-  "#a78bfa",
-  "#38bdf8",
-  "#22d3ee",
-  "#93c5fd",
-  "#c4b5fd",
-  "#7dd3fc",
-  "#2563eb",
-];
-
 export default function Graphic2() {
   const [shapers, setShapers] = useState([]);
   const [selected, setSelected] = useState(null);
   const svgRef = useRef();
   const [legendOpen, setLegendOpen] = useState(false);
+  const [tipsOpen, setTipsOpen] = useState(false);
+  const [resourcesOpen, setResourcesOpen] = useState(false);
+  const [dimensions, setDimensions] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  const isMobile = dimensions.width <= 768;
+  const HUB_COLORS = [
+    "#60a5fa",
+    "#818cf8",
+    "#a78bfa",
+    "#38bdf8",
+    "#22d3ee",
+    "#93c5fd",
+    "#c4b5fd",
+    "#7dd3fc",
+    "#2563eb",
+  ];
 
   useEffect(() => {
     const shapersRef = ref(db, "shapers");
 
-    onValue(shapersRef, (snapshot) => {
+    const unsubscribe = onValue(shapersRef, (snapshot) => {
       const data = snapshot.val();
       if (data) setShapers(Object.values(data));
     });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
     if (shapers.length === 0) return;
 
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const { width, height } = dimensions;
 
     const centerX = width / 2;
     const centerY = height / 2 + 20;
@@ -52,12 +73,12 @@ export default function Graphic2() {
       for (let j = i + 1; j < shapers.length; j++) {
         const sharedIssues =
           shapers[i].issues?.filter((issue) =>
-            shapers[j].issues?.includes(issue)
+            shapers[j].issues?.includes(issue),
           ) || [];
 
         const sharedSkills =
           shapers[i].skills?.filter((skill) =>
-            shapers[j].skills?.includes(skill)
+            shapers[j].skills?.includes(skill),
           ) || [];
 
         if (sharedIssues.length > 0 || sharedSkills.length > 0) {
@@ -73,11 +94,9 @@ export default function Graphic2() {
     const connectionCount = {};
 
     links.forEach((l) => {
-      connectionCount[l.source] =
-        (connectionCount[l.source] || 0) + 1;
+      connectionCount[l.source] = (connectionCount[l.source] || 0) + 1;
 
-      connectionCount[l.target] =
-        (connectionCount[l.target] || 0) + 1;
+      connectionCount[l.target] = (connectionCount[l.target] || 0) + 1;
     });
 
     const nodes = shapers.map((s, i) => ({
@@ -88,10 +107,7 @@ export default function Graphic2() {
 
     const hubs = [...new Set(shapers.map((s) => s.hub))];
 
-    const colorScale = d3
-      .scaleOrdinal()
-      .domain(hubs)
-      .range(HUB_COLORS);
+    const colorScale = d3.scaleOrdinal().domain(hubs).range(HUB_COLORS);
 
     const nodeRadius = (d) => 10 + Math.min(d.connections * 1.8, 14);
 
@@ -99,16 +115,21 @@ export default function Graphic2() {
       .forceSimulation(nodes)
       .force(
         "link",
-        d3.forceLink(links).id((d) => d.id).distance(140)
+        d3
+          .forceLink(links)
+          .id((d) => d.id)
+          .distance(isMobile ? 90 : 140),
       )
-      .force("charge", d3.forceManyBody().strength(-350))
+      .force("charge", d3.forceManyBody().strength(isMobile ? -120 : -350))
       .force("center", d3.forceCenter(centerX, centerY))
       .force(
         "collision",
-        d3.forceCollide((d) => nodeRadius(d) + 6)
+        d3.forceCollide((d) => nodeRadius(d) + (isMobile ? 10 : 6)),
       )
       .force("x", d3.forceX(centerX).strength(0.05))
       .force("y", d3.forceY(centerY).strength(0.05));
+
+    simulation.alphaDecay(0.03);
 
     // LINKS
     const link = svg
@@ -135,8 +156,7 @@ export default function Graphic2() {
         d3
           .drag()
           .on("start", (event, d) => {
-            if (!event.active)
-              simulation.alphaTarget(0.3).restart(); 
+            if (!event.active) simulation.alphaTarget(0.3).restart();
 
             d.fx = d.x;
             d.fy = d.y;
@@ -146,12 +166,11 @@ export default function Graphic2() {
             d.fy = event.y;
           })
           .on("end", (event, d) => {
-            if (!event.active)
-              simulation.alphaTarget(0);
+            if (!event.active) simulation.alphaTarget(0);
 
             d.fx = null;
             d.fy = null;
-          })
+          }),
       );
 
     // Pulse Ring
@@ -176,10 +195,7 @@ export default function Graphic2() {
       .attr("fill", (d) => colorScale(d.hub))
       .attr("stroke", "rgba(255,255,255,0.8)")
       .attr("stroke-width", 2)
-      .attr(
-        "filter",
-        "drop-shadow(0 0 12px rgba(0,0,0,0.35))"
-      )
+      .attr("filter", "drop-shadow(0 0 12px rgba(0,0,0,0.35))")
       .transition()
       .duration(500)
       .delay((d, i) => i * 80)
@@ -189,24 +205,43 @@ export default function Graphic2() {
     // Labels
     node
       .append("text")
-      .text(d => {
+      .text((d) => {
+        const r = nodeRadius(d);
+
+        if (isMobile && r < 16) {
+          return "";
+        }
+
         const firstName = d.name.split(" ")[0];
-        const maxChars = Math.floor(nodeRadius(d) / 5);
-        return firstName.length > maxChars ? firstName.slice(0, maxChars) + "…" : firstName;
+        const maxChars = Math.floor(r / 5);
+
+        return firstName.length > maxChars
+          ? firstName.slice(0, maxChars) + "…"
+          : firstName;
       })
       .attr("text-anchor", "middle")
       .attr("dy", "0.35em")
       .attr("fill", "#fff")
-      .attr("font-size", d => Math.min(13, nodeRadius(d) / 2.5))
+      .attr("font-size", (d) => Math.min(13, nodeRadius(d) / 2.5))
       .attr("font-weight", "600")
       .attr("font-family", "Inter, sans-serif")
       .style("pointer-events", "none");
 
     simulation.on("tick", () => {
+      const topPadding = isMobile ? 120 : 80;
+      const bottomPadding = isMobile ? 180 : 80;
+
       nodes.forEach((d) => {
         const r = nodeRadius(d);
-        d.x = Math.max(260, Math.min(width - 260, d.x));
-        d.y = Math.max(80 + r, Math.min(height - r - 80, d.y));
+
+        d.x = isMobile
+          ? Math.max(r + 10, Math.min(width - r - 10, d.x))
+          : Math.max(260, Math.min(width - 260, d.x));
+
+        d.y = Math.max(
+          topPadding + r,
+          Math.min(height - r - bottomPadding, d.y),
+        );
       });
 
       svg
@@ -216,14 +251,15 @@ export default function Graphic2() {
         .attr("x2", (d) => d.target.x)
         .attr("y2", (d) => d.target.y);
 
-      node.attr(
-        "transform",
-        (d) => `translate(${d.x},${d.y})`
-      );
+      node.attr("transform", (d) => `translate(${d.x},${d.y})`);
     });
 
-    return () => simulation.stop();
-  }, [shapers]);
+    return () => {
+      simulation.stop();
+      svg.interrupt();
+      svg.selectAll("*").interrupt();
+    };
+  }, [shapers, dimensions]);
 
   const hubs = [...new Set(shapers.map((s) => s.hub))];
 
@@ -234,21 +270,23 @@ export default function Graphic2() {
     : "#";
 
   const isValidUrl = (str) => {
-    if (!str || str.includes(" ")) return false;
-    if (!str.match(/\.(com|org|net|edu|gov|io|co|us|uk|me|app|dev|ai|ly|link|info|tech|gg)(\/.*)?(#.*)?$/i)) return false;
-    try {
-      new URL(str.startsWith("http") ? str : `https://${str}`);
-      return true;
-    } catch {
+    if (!str || typeof str !== "string") {
       return false;
     }
+
+    const value = str.trim();
+
+    const urlRegex =
+      /^(https?:\/\/)?(([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}(\/.*)?$/i;
+
+    return urlRegex.test(value);
   };
 
   return (
     <div
       style={{
         background: "#020b18",
-        minHeight: "100vh",
+        minHeight: "100dvh",
         position: "relative",
         overflow: "hidden",
       }}
@@ -258,42 +296,68 @@ export default function Graphic2() {
 
       {/* Header */}
       <div style={styles.header}>
-        <h1 style={styles.title}>
-          Bridges of Belonging
-        </h1>
+        <h1 style={styles.title}>Bridges of Belonging</h1>
 
         <p style={styles.subtitle}>
           {shapers.length} Shaper
-          {shapers.length !== 1 ? "s" : ""} in the
-          network · Click any node to connect
+          {shapers.length !== 1 ? "s" : ""} in the network · Click any node to
+          connect
         </p>
       </div>
 
-      <svg
-        ref={svgRef}
-        style={{ display: "block" }}
-      />
+      {/* Mobile toggle buttons*/}
+      <div className="mobile-sidebar-btns" style={styles.mobileBtns}>
+        <button
+          style={styles.mobileBtn}
+          onClick={() => {
+            setTipsOpen((prev) => !prev);
+            setResourcesOpen(false);
+          }}
+        >
+          {tipsOpen ? "Hide Tips" : "Your Tips"}
+        </button>
+        <button
+          style={styles.mobileBtn}
+          onClick={() => {
+            setResourcesOpen((prev) => !prev);
+            setTipsOpen(false);
+          }}
+        >
+          {resourcesOpen ? "Hide Resources" : "Resources"}
+        </button>
+      </div>
+
+      <svg ref={svgRef} style={{ display: "block" }} />
 
       {/* Tips Sidebar — Left */}
       {shapers.some((s) => s.practice) && (
-        <div style={styles.sidebarLeft}>
+        <div
+          style={styles.sidebarLeft}
+          className={`sidebar-left ${tipsOpen ? "open" : ""}`}
+        >
           <h3 style={styles.sidebarTitle}>Your Tips</h3>
           <div style={styles.practiceList}>
-            {shapers.filter((s) => s.practice).map((s, i) => (
-              <div key={i} style={styles.practiceItem}>
-                <p style={styles.practiceText}>"{s.practice}"</p>
-                <p style={styles.practiceName}>— {s.name}, {s.hub}</p>
-              </div>
-            ))}
+            {shapers
+              .filter((s) => s.practice)
+              .map((s, i) => (
+                <div key={i} style={styles.practiceItem}>
+                  <p style={styles.practiceText}>"{s.practice}"</p>
+                  <p style={styles.practiceName}>
+                    — {s.name}, {s.hub}
+                  </p>
+                </div>
+              ))}
           </div>
         </div>
       )}
 
       {/* Resources Sidebar — Right */}
       {shapers.some((s) => s.link) && (
-        <div style={styles.sidebarRight}>
+        <div
+          style={styles.sidebarRight}
+          className={`sidebar-right ${resourcesOpen ? "open" : ""}`}
+        >
           <h3 style={styles.sidebarTitle}>Resources Shared</h3>
-
           <div style={styles.practiceList}>
             {shapers
               .filter((s) => s.link)
@@ -302,9 +366,7 @@ export default function Graphic2() {
                   {isValidUrl(s.link) ? (
                     <a
                       href={
-                        s.link.startsWith("http")
-                          ? s.link
-                          : `https://${s.link}`
+                        s.link.startsWith("http") ? s.link : `https://${s.link}`
                       }
                       target="_blank"
                       rel="noreferrer"
@@ -313,9 +375,7 @@ export default function Graphic2() {
                       {s.link}
                     </a>
                   ) : (
-                    <p style={styles.practiceText}>
-                      {s.link}
-                    </p>
+                    <p style={styles.practiceText}>{s.link}</p>
                   )}
 
                   <p style={styles.practiceName}>
@@ -326,20 +386,23 @@ export default function Graphic2() {
           </div>
         </div>
       )}
-      
+
       {/* Legend */}
       {hubs.length > 0 && (
-        <div style={styles.legend}>
+        <div style={styles.legend} className="legend">
           <button
             style={styles.legendToggle}
-            onClick={() => setLegendOpen(prev => !prev)}
+            onClick={() => setLegendOpen((prev) => !prev)}
           >
             <div style={styles.legendDotRow}>
               {hubs.slice(0, 3).map((hub, i) => (
-                <div key={hub} style={{
-                  ...styles.legendDot,
-                  background: HUB_COLORS[i % HUB_COLORS.length]
-                }} />
+                <div
+                  key={hub}
+                  style={{
+                    ...styles.legendDot,
+                    background: HUB_COLORS[i % HUB_COLORS.length],
+                  }}
+                />
               ))}
               {hubs.length > 3 && (
                 <span style={styles.legendMore}>+{hubs.length - 3}</span>
@@ -354,10 +417,12 @@ export default function Graphic2() {
             <div style={styles.legendExpanded}>
               {hubs.map((hub, i) => (
                 <div key={hub} style={styles.legendItem}>
-                  <div style={{
-                    ...styles.legendDot,
-                    background: HUB_COLORS[i % HUB_COLORS.length]
-                  }} />
+                  <div
+                    style={{
+                      ...styles.legendDot,
+                      background: HUB_COLORS[i % HUB_COLORS.length],
+                    }}
+                  />
                   <span style={styles.legendLabel}>{hub}</span>
                 </div>
               ))}
@@ -368,8 +433,20 @@ export default function Graphic2() {
 
       {/* Profile Card */}
       {selected && (
-        <div style={styles.card}>
-          <button style={styles.close} onClick={() => setSelected(null)}>✕</button>
+        <div
+          style={{
+            ...styles.card,
+            bottom: isMobile ? 0 : 32,
+            right: isMobile ? 0 : 32,
+            left: isMobile ? 0 : "auto",
+            width: isMobile ? "100%" : 300,
+            maxHeight: isMobile ? "75dvh" : "55dvh",
+            borderRadius: isMobile ? "24px 24px 0 0" : 20,
+          }}
+        >
+          <button style={styles.close} onClick={() => setSelected(null)}>
+            ✕
+          </button>
 
           <h2 style={styles.cardName}>{selected.name}</h2>
           <p style={styles.cardHub}>📍 {selected.hub}</p>
@@ -377,7 +454,9 @@ export default function Graphic2() {
           <p style={styles.cardLabel}>Weighing on them</p>
           <div style={styles.tagRow}>
             {selected.issues?.map((i) => (
-              <span key={i} style={styles.tagIssue}>{i}</span>
+              <span key={i} style={styles.tagIssue}>
+                {i}
+              </span>
             ))}
           </div>
 
@@ -386,7 +465,9 @@ export default function Graphic2() {
               <p style={styles.cardLabel}>They can offer</p>
               <div style={styles.tagRow}>
                 {selected.skills.map((s) => (
-                  <span key={s} style={styles.tagSkill}>{s}</span>
+                  <span key={s} style={styles.tagSkill}>
+                    {s}
+                  </span>
                 ))}
               </div>
             </div>
@@ -404,7 +485,11 @@ export default function Graphic2() {
               <p style={styles.cardLabel}>Resource they shared</p>
               {isValidUrl(selected.link) ? (
                 <a
-                  href={selected.link.startsWith("http") ? selected.link : `https://${selected.link}`}
+                  href={
+                    selected.link.startsWith("http")
+                      ? selected.link
+                      : `https://${selected.link}`
+                  }
                   target="_blank"
                   rel="noreferrer"
                   style={styles.resourceLink}
@@ -412,7 +497,9 @@ export default function Graphic2() {
                   {selected.link}
                 </a>
               ) : (
-                <p style={{ ...styles.cardPractice, fontStyle: "normal" }}>{selected.link}</p>
+                <p style={{ ...styles.cardPractice, fontStyle: "normal" }}>
+                  {selected.link}
+                </p>
               )}
             </div>
           )}
@@ -422,7 +509,9 @@ export default function Graphic2() {
               Reach out to {selected.name.split(" ")[0]} &#8594;
             </a>
           ) : (
-            <p style={styles.notConnecting}>Not available to connect right now</p>
+            <p style={styles.notConnecting}>
+              Not available to connect right now
+            </p>
           )}
         </div>
       )}
@@ -491,10 +580,10 @@ const styles = {
     borderRadius: 20,
     padding: 20,
     zIndex: 50,
-    maxHeight: "80vh",
+    maxHeight: "80dvh",
     overflowY: "auto",
     border: "1px solid rgba(255, 255, 255, 0.08)",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.4)"
+    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
   },
   sidebarRight: {
     position: "fixed",
@@ -506,10 +595,10 @@ const styles = {
     borderRadius: 20,
     padding: 20,
     zIndex: 50,
-    maxHeight: "80vh",
+    maxHeight: "80dvh",
     overflowY: "auto",
     border: "1px solid rgba(255, 255, 255, 0.08)",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.4)"
+    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
   },
   sidebarTitle: {
     color: "rgba(232, 244, 248, 0.45)",
@@ -525,8 +614,7 @@ const styles = {
     gap: 16,
   },
   practiceItem: {
-    borderLeft:
-      "2px solid rgba(147, 197, 253, 0.5)",
+    borderLeft: "2px solid rgba(147, 197, 253, 0.5)",
     paddingLeft: 12,
   },
   practiceText: {
@@ -559,7 +647,7 @@ const styles = {
     zIndex: 50,
     border: "1px solid rgba(255, 255, 255, 0.08)",
     boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-    maxWidth: 200
+    maxWidth: 200,
   },
   legendToggle: {
     display: "flex",
@@ -569,7 +657,7 @@ const styles = {
     border: "none",
     cursor: "pointer",
     padding: 0,
-    width: "100%"
+    width: "100%",
   },
   legendToggleLabel: {
     color: "rgba(232, 244, 248, 0.5)",
@@ -577,17 +665,17 @@ const styles = {
     fontWeight: 700,
     textTransform: "uppercase",
     letterSpacing: "0.1em",
-    fontFamily: "'Inter', sans-serif"
+    fontFamily: "'Inter', sans-serif",
   },
   legendDotRow: {
     display: "flex",
     gap: 4,
-    alignItems: "center"
+    alignItems: "center",
   },
   legendMore: {
     color: "rgba(232, 244, 248, 0.4)",
     fontSize: 10,
-    fontFamily: "'Inter', sans-serif"
+    fontFamily: "'Inter', sans-serif",
   },
   legendExpanded: {
     marginTop: 12,
@@ -595,41 +683,35 @@ const styles = {
     flexDirection: "column",
     gap: 8,
     paddingTop: 12,
-    borderTop: "1px solid rgba(255,255,255,0.06)"
+    borderTop: "1px solid rgba(255,255,255,0.06)",
   },
   legendItem: {
     display: "flex",
     alignItems: "center",
-    gap: 8
+    gap: 8,
   },
   legendDot: {
     width: 8,
     height: 8,
     borderRadius: "50%",
-    flexShrink: 0
+    flexShrink: 0,
   },
   legendLabel: {
     color: "#e8f4f8",
     fontSize: 13,
-    fontFamily: "'Inter', sans-serif"
+    fontFamily: "'Inter', sans-serif",
   },
   card: {
     position: "fixed",
-    bottom: 32,
-    right: 32,
-    width: 300,
     background: "rgba(5, 20, 40, 0.92)",
     backdropFilter: "blur(20px)",
-    borderRadius: 20,
     padding: 24,
     boxShadow:
       "0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)",
     fontFamily: "'Inter', sans-serif",
     zIndex: 100,
-    maxHeight: "55vh",
     overflowY: "auto",
-    border:
-      "1px solid rgba(255, 255, 255, 0.1)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
     color: "#e8f4f8",
   },
   close: {
@@ -667,21 +749,17 @@ const styles = {
     gap: 6,
   },
   tagIssue: {
-    background:
-      "rgba(147, 197, 253, 0.1)",
+    background: "rgba(147, 197, 253, 0.1)",
     color: "#93c5fd",
-    border:
-      "1px solid rgba(147, 197, 253, 0.25)",
+    border: "1px solid rgba(147, 197, 253, 0.25)",
     borderRadius: 12,
     padding: "4px 10px",
     fontSize: 12,
   },
   tagSkill: {
-    background:
-      "rgba(196, 181, 253, 0.1)",
+    background: "rgba(196, 181, 253, 0.1)",
     color: "#c4b5fd",
-    border:
-      "1px solid rgba(196, 181, 253, 0.25)",
+    border: "1px solid rgba(196, 181, 253, 0.25)",
     borderRadius: 12,
     padding: "4px 10px",
     fontSize: 12,
@@ -695,8 +773,7 @@ const styles = {
   emailBtn: {
     display: "block",
     marginTop: 20,
-    background:
-      "linear-gradient(135deg, #1e40af, #6d28d9)",
+    background: "linear-gradient(135deg, #1e40af, #6d28d9)",
     color: "#fff",
     textAlign: "center",
     padding: "12px",
@@ -704,8 +781,7 @@ const styles = {
     textDecoration: "none",
     fontWeight: 700,
     fontSize: 14,
-    boxShadow:
-      "0 4px 16px rgba(109, 40, 217, 0.3)",
+    boxShadow: "0 4px 16px rgba(109, 40, 217, 0.3)",
   },
   notConnecting: {
     marginTop: 20,
@@ -713,5 +789,25 @@ const styles = {
     color: "rgba(232,244,248,0.45)",
     fontSize: 13,
     fontStyle: "italic",
+  },
+  mobileBtns: {
+    position: "fixed",
+    bottom: 24,
+    left: "50%",
+    transform: "translateX(-50%)",
+    gap: 12,
+    zIndex: 150,
+  },
+  mobileBtn: {
+    background: "rgba(5, 20, 40, 0.9)",
+    border: "1px solid rgba(255,255,255,0.15)",
+    borderRadius: 20,
+    color: "#e8f4f8",
+    padding: "10px 20px",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "'Inter', sans-serif",
+    backdropFilter: "blur(12px)",
   },
 };
