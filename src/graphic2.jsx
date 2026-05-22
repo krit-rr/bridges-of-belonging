@@ -269,17 +269,39 @@ export default function Graphic2() {
       }, I saw we're both navigating some of the same things at the retreat - would love to connect.`
     : "#";
 
-  const isValidUrl = (str) => {
+  const extractUrl = (str) => {
     if (!str || typeof str !== "string") {
-      return false;
+      return null;
     }
+    const match = str.match(
+      /((https?:\/\/)?([a-z\d-]+\.)+[a-z]{2,}(\/[^\s]*)?)/i
+    );
+    if (!match) {
+      return null;
+    }
+    const url = match[0];
+    return url.startsWith("http") ? url : `https://${url}`;
+  }
+  
+  const extractParts = (str) => {
+    if (!str || typeof str !== "string") return null;
 
-    const value = str.trim();
+    const match = str.match(
+      /((https?:\/\/)?([a-z\d-]+\.)+[a-z]{2,}(\/[^\s]*)?)/i
+    );
 
-    const urlRegex =
-      /^(https?:\/\/)?(([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}(\/.*)?$/i;
+    if (!match) return null;
 
-    return urlRegex.test(value);
+    const rawUrl = match[0];
+
+    const url = rawUrl.startsWith("http")
+      ? rawUrl
+      : `https://${rawUrl}`;
+
+    return {
+      url,
+      rest: str.replace(rawUrl, "").trim(),
+    };
   };
 
   return (
@@ -341,7 +363,7 @@ export default function Graphic2() {
               .filter((s) => s.practice)
               .map((s, i) => (
                 <div key={i} style={styles.practiceItem}>
-                  <p style={styles.practiceText}>"{s.practice}"</p>
+                  <p style={styles.practiceText}>{s.practice}</p>
                   <p style={styles.practiceName}>
                     — {s.name}, {s.hub}
                   </p>
@@ -352,40 +374,45 @@ export default function Graphic2() {
       )}
 
       {/* Resources Sidebar — Right */}
-      {shapers.some((s) => s.link) && (
-        <div
-          style={styles.sidebarRight}
-          className={`sidebar-right ${resourcesOpen ? "open" : ""}`}
-        >
-          <h3 style={styles.sidebarTitle}>Resources Shared</h3>
-          <div style={styles.practiceList}>
-            {shapers
-              .filter((s) => s.link)
-              .map((s, i) => (
-                <div key={i} style={styles.practiceItem}>
-                  {isValidUrl(s.link) ? (
-                    <a
-                      href={
-                        s.link.startsWith("http") ? s.link : `https://${s.link}`
-                      }
-                      target="_blank"
-                      rel="noreferrer"
-                      style={styles.resourceLink}
-                    >
-                      {s.link}
-                    </a>
-                  ) : (
-                    <p style={styles.practiceText}>{s.link}</p>
-                  )}
-
-                  <p style={styles.practiceName}>
-                    — {s.name}, {s.hub}
-                  </p>
-                </div>
-              ))}
-          </div>
+      {/* Resources Sidebar — Right */}
+{shapers.some((s) => s.link) && (
+  <div
+    style={styles.sidebarRight}
+    className={`sidebar-right ${resourcesOpen ? "open" : ""}`}
+  >
+    <h3 style={styles.sidebarTitle}>Resources Shared</h3>
+    <div style={styles.practiceList}>
+      {shapers.filter((s) => s.link).map((s, i) => (
+        <div key={i} style={styles.practiceItem}>
+          {(() => {
+            const parts = extractParts(s.link);
+            if (!parts) {
+              return <p style={styles.practiceText}>{s.link}</p>;
+            }
+            return (
+              <div style={styles.practiceText}>
+                <a
+                  href={parts.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: "#93c5fd", textDecoration: "underline" }}
+                >
+                  {parts.url}
+                </a>
+                {parts.rest && (
+                  <span style={{ color: "#e8f4f8", marginLeft: 6 }}>
+                    {parts.rest}
+                  </span>
+                )}
+              </div>
+            );
+          })()}
+          <p style={styles.practiceName}>— {s.name}, {s.hub}</p>
         </div>
-      )}
+      ))}
+    </div>
+  </div>
+)}
 
       {/* Legend */}
       {hubs.length > 0 && (
@@ -483,24 +510,41 @@ export default function Graphic2() {
           {selected.link && (
             <div>
               <p style={styles.cardLabel}>Resource they shared</p>
-              {isValidUrl(selected.link) ? (
-                <a
-                  href={
-                    selected.link.startsWith("http")
-                      ? selected.link
-                      : `https://${selected.link}`
-                  }
-                  target="_blank"
-                  rel="noreferrer"
-                  style={styles.resourceLink}
-                >
-                  {selected.link}
-                </a>
-              ) : (
-                <p style={{ ...styles.cardPractice, fontStyle: "normal" }}>
-                  {selected.link}
-                </p>
-              )}
+
+              {(() => {
+                const parts = extractParts(selected.link);
+
+                if (!parts) {
+                  return (
+                    <div style={{ ...styles.cardPractice, fontStyle: "normal" }}>
+                      {selected.link}
+                    </div>
+                  );
+                }
+
+                return (
+                  <div style={styles.cardPractice}>
+                    <a
+                      href={parts.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        color: "#93c5fd",
+                        textDecoration: "underline",
+                        display: "inline",
+                      }}
+                    >
+                      {parts.url}
+                    </a>
+
+                    {parts.rest && (
+                      <span style={{ textDecoration: "none", marginLeft: 6 }}>
+                        {parts.rest}
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
 
@@ -574,7 +618,7 @@ const styles = {
     position: "fixed",
     top: 80,
     left: 24,
-    width: 220,
+    width: 250,
     background: "rgba(5, 20, 40, 0.8)",
     backdropFilter: "blur(16px)",
     borderRadius: 20,
@@ -589,7 +633,7 @@ const styles = {
     position: "fixed",
     top: 80,
     right: 24,
-    width: 220,
+    width: 250,
     background: "rgba(5, 20, 40, 0.8)",
     backdropFilter: "blur(16px)",
     borderRadius: 20,
@@ -620,7 +664,6 @@ const styles = {
   practiceText: {
     color: "#e8f4f8",
     fontSize: 13,
-    fontStyle: "italic",
     margin: "0 0 4px",
     lineHeight: 1.5,
   },
@@ -632,7 +675,7 @@ const styles = {
   resourceLink: {
     color: "#93c5fd",
     fontSize: 12,
-    wordBreak: "break-all",
+    // wordBreak: "break-all",
     textDecoration: "underline",
   },
   legend: {
